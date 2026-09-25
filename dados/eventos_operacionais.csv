@@ -1,0 +1,145 @@
+evento_id,ativo_id,inicio_ts,fim_ts,severidade,categoria_evento,planejado,energia_nao_suprida_mwh,status_evento
+EVT-001,ATV-001,2026-07-01T06:00:00,2026-07-01T06:25:00,Baixa,Inspeção preventiva,true,4.8,Encerrado
+EVT-002,ATV-001,2026-07-01T11:23:00,2026-07-01T12:07:00,Média,Manutenção planejada,true,6.9,Encerrado
+EVT-003,ATV-001,2026-07-01T17:46:00,2026-07-01T18:49:00,Alta,Falha de comunicação,false,21.0,Encerrado
+EVT-004,ATV-001,2026-07-02T00:19:00,2026-07-02T01:41:00,Baixa,Inspeção preventiva,true,11.1,Encerrado
+EVT-005,ATV-001,2026-07-02T08:42:00,2026-07-02T10:23:00,Baixa,Inspeção preventiva,true,13.2,Encerrado
+EVT-006,ATV-001,2026-07-02T13:15:00,2026-07-02T15:15:00,Média,Manutenção planejada,true,15.3,Encerrado
+EVT-007,ATV-001,2026-07-02T19:38:00,2026-07-02T21:57:00,Alta,Falha de comunicação,false,29.4,Encerrado
+EVT-008,ATV-001,2026-07-03T02:11:00,2026-07-03T04:49:00,Baixa,Inspeção preventiva,true,19.6,Encerrado
+EVT-009,ATV-001,2026-07-03T10:34:00,2026-07-03T13:31:00,Baixa,Inspeção preventiva,true,21.7,Encerrado
+EVT-010,ATV-001,2026-07-03T15:07:00,2026-07-03T15:43:00,Média,Manutenção planejada,true,6.0,Encerrado
+EVT-011,ATV-001,2026-07-03T21:30:00,2026-07-03T22:25:00,Alta,Falha de comunicação,false,20.1,Encerrado
+EVT-012,ATV-001,2026-07-04T04:03:00,2026-07-04T05:17:00,Baixa,Inspeção preventiva,true,10.2,Encerrado
+EVT-013,ATV-001,2026-07-04T12:26:00,2026-07-04T13:59:00,Baixa,Inspeção preventiva,true,12.3,Encerrado
+EVT-014,ATV-001,2026-07-04T17:49:00,2026-07-04T19:41:00,Média,Manutenção planejada,true,14.4,Encerrado
+EVT-015,ATV-002,2026-07-04T23:00:00,2026-07-05T00:20:00,Alta,Proteção acionada,false,40.9,Encerrado
+EVT-016,ATV-002,2026-07-05T04:23:00,2026-07-05T06:20:00,Crítica,Falha de comunicação,false,45.0,Encerrado
+EVT-017,ATV-002,2026-07-05T10:46:00,2026-07-05T13:20:00,Crítica,Restrição de rede,false,49.1,Encerrado
+EVT-018,ATV-002,2026-07-05T17:19:00,2026-07-05T20:30:00,Média,Proteção acionada,false,53.2,Encerrado
+EVT-019,ATV-002,2026-07-06T01:42:00,2026-07-06T05:30:00,Alta,Falha de comunicação,false,57.3,Encerrado
+EVT-020,ATV-002,2026-07-06T06:15:00,2026-07-06T10:40:00,Alta,Proteção acionada,false,61.4,Encerrado
+EVT-021,ATV-002,2026-07-06T12:38:00,2026-07-06T17:40:00,Crítica,Falha de comunicação,false,65.6,Encerrado
+EVT-022,ATV-002,2026-07-06T19:11:00,2026-07-07T00:50:00,Crítica,Restrição de rede,false,69.7,Encerrado
+EVT-023,ATV-002,2026-07-07T03:34:00,2026-07-07T09:50:00,Média,Proteção acionada,false,73.8,Encerrado
+EVT-024,ATV-002,2026-07-07T08:07:00,2026-07-07T15:00:00,Alta,Falha de comunicação,false,77.9,Encerrado
+EVT-025,ATV-002,2026-07-07T14:30:00,2026-07-07T22:00:00,Alta,Proteção acionada,false,82.0,Encerrado
+EVT-026,ATV-002,2026-07-07T21:03:00,2026-07-08T05:10:00,Crítica,Falha de comunicação,false,86.1,Encerrado
+EVT-027,ATV-002,2026-07-08T05:26:00,2026-07-08T07:10:00,Crítica,Restrição de rede,false,43.6,Encerrado
+EVT-028,ATV-002,2026-07-08T10:49:00,2026-07-08T13:10:00,Média,Proteção acionada,false,47.7,Encerrado
+EVT-029,ATV-002,2026-07-08T16:22:00,2026-07-08T19:20:00,Alta,Falha de comunicação,false,51.8,Encerrado
+EVT-030,ATV-002,2026-07-08T23:45:00,2026-07-09T03:20:00,Alta,Proteção acionada,false,55.9,Encerrado
+EVT-031,ATV-002,2026-07-09T07:18:00,2026-07-09T11:30:00,Crítica,Falha de comunicação,false,60.0,Encerrado
+EVT-032,ATV-002,2026-07-09T12:41:00,2026-07-09T17:30:00,Crítica,Restrição de rede,false,64.1,Encerrado
+EVT-033,ATV-002,2026-07-09T18:14:00,2026-07-09T23:40:00,Média,Proteção acionada,false,68.2,Encerrado
+EVT-034,ATV-002,2026-07-10T01:37:00,2026-07-10T07:40:00,Alta,Falha de comunicação,false,72.3,Encerrado
+EVT-035,ATV-002,2026-07-10T09:10:00,2026-07-10T15:50:00,Alta,Proteção acionada,false,76.4,Encerrado
+EVT-036,ATV-002,2026-07-10T14:33:00,2026-07-10T21:50:00,Crítica,Falha de comunicação,false,80.6,Encerrado
+EVT-037,ATV-002,2026-07-10T20:06:00,2026-07-11T04:00:00,Crítica,Restrição de rede,false,84.7,Encerrado
+EVT-038,ATV-002,2026-07-11T03:29:00,2026-07-11T05:00:00,Média,Proteção acionada,false,42.1,Encerrado
+EVT-039,ATV-002,2026-07-11T11:02:00,2026-07-11T13:10:00,Alta,Falha de comunicação,false,46.2,Encerrado
+EVT-040,ATV-002,2026-07-11T16:25:00,2026-07-11T19:10:00,Alta,Proteção acionada,false,50.3,Encerrado
+EVT-041,ATV-002,2026-07-11T22:48:00,2026-07-12T02:10:00,Crítica,Falha de comunicação,false,54.4,Encerrado
+EVT-042,ATV-002,2026-07-12T05:21:00,2026-07-12T09:20:00,Crítica,Restrição de rede,false,58.6,Encerrado
+EVT-043,ATV-002,2026-07-12T13:44:00,2026-07-12T18:20:00,Média,Proteção acionada,false,62.7,Encerrado
+EVT-044,ATV-002,2026-07-12T18:17:00,2026-07-12T23:30:00,Alta,Falha de comunicação,false,66.8,Encerrado
+EVT-045,ATV-002,2026-07-13T00:40:00,2026-07-13T06:30:00,Alta,Proteção acionada,false,70.9,Encerrado
+EVT-046,ATV-002,2026-07-13T07:13:00,2026-07-13T13:40:00,Crítica,Falha de comunicação,false,75.0,Aberto
+EVT-047,ATV-003,2026-07-13T15:00:00,2026-07-13T15:40:00,Baixa,Manutenção planejada,true,6.4,Encerrado
+EVT-048,ATV-003,2026-07-13T20:23:00,2026-07-13T21:32:00,Baixa,Inspeção preventiva,true,9.7,Encerrado
+EVT-049,ATV-003,2026-07-14T02:46:00,2026-07-14T04:24:00,Média,Restrição de rede,false,24.9,Encerrado
+EVT-050,ATV-003,2026-07-14T09:19:00,2026-07-14T11:26:00,Alta,Manutenção planejada,true,16.1,Encerrado
+EVT-051,ATV-003,2026-07-14T17:42:00,2026-07-14T20:18:00,Baixa,Manutenção planejada,true,19.3,Encerrado
+EVT-052,ATV-003,2026-07-14T22:15:00,2026-07-15T01:20:00,Baixa,Inspeção preventiva,true,22.6,Encerrado
+EVT-053,ATV-003,2026-07-15T04:38:00,2026-07-15T08:12:00,Média,Restrição de rede,false,37.8,Encerrado
+EVT-054,ATV-003,2026-07-15T11:11:00,2026-07-15T15:14:00,Alta,Manutenção planejada,true,29.0,Encerrado
+EVT-055,ATV-003,2026-07-15T19:34:00,2026-07-16T00:06:00,Baixa,Manutenção planejada,true,32.2,Encerrado
+EVT-056,ATV-003,2026-07-16T00:07:00,2026-07-16T01:08:00,Baixa,Inspeção preventiva,true,8.8,Encerrado
+EVT-057,ATV-004,2026-07-16T06:00:00,2026-07-16T07:20:00,Alta,Proteção acionada,false,40.9,Encerrado
+EVT-058,ATV-004,2026-07-16T11:23:00,2026-07-16T13:20:00,Crítica,Falha de comunicação,false,45.0,Encerrado
+EVT-059,ATV-004,2026-07-16T17:46:00,2026-07-16T20:20:00,Crítica,Restrição de rede,false,49.1,Encerrado
+EVT-060,ATV-004,2026-07-17T00:19:00,2026-07-17T03:30:00,Média,Proteção acionada,false,53.2,Encerrado
+EVT-061,ATV-004,2026-07-17T08:42:00,2026-07-17T12:30:00,Alta,Falha de comunicação,false,57.3,Encerrado
+EVT-062,ATV-004,2026-07-17T13:15:00,2026-07-17T17:40:00,Alta,Proteção acionada,false,61.4,Encerrado
+EVT-063,ATV-004,2026-07-17T19:38:00,2026-07-18T00:40:00,Crítica,Falha de comunicação,false,65.6,Encerrado
+EVT-064,ATV-004,2026-07-18T02:11:00,2026-07-18T07:50:00,Crítica,Restrição de rede,false,69.7,Encerrado
+EVT-065,ATV-004,2026-07-18T10:34:00,2026-07-18T16:50:00,Média,Proteção acionada,false,73.8,Encerrado
+EVT-066,ATV-004,2026-07-18T15:07:00,2026-07-18T22:00:00,Alta,Falha de comunicação,false,77.9,Encerrado
+EVT-067,ATV-004,2026-07-18T21:30:00,2026-07-19T05:00:00,Alta,Proteção acionada,false,82.0,Encerrado
+EVT-068,ATV-004,2026-07-19T04:03:00,2026-07-19T12:10:00,Crítica,Falha de comunicação,false,86.1,Encerrado
+EVT-069,ATV-004,2026-07-19T12:26:00,2026-07-19T14:10:00,Crítica,Restrição de rede,false,43.6,Encerrado
+EVT-070,ATV-004,2026-07-19T17:49:00,2026-07-19T20:10:00,Média,Proteção acionada,false,47.7,Encerrado
+EVT-071,ATV-004,2026-07-19T23:22:00,2026-07-20T02:20:00,Alta,Falha de comunicação,false,51.8,Encerrado
+EVT-072,ATV-004,2026-07-20T06:45:00,2026-07-20T10:20:00,Alta,Proteção acionada,false,55.9,Encerrado
+EVT-073,ATV-004,2026-07-20T14:18:00,2026-07-20T18:30:00,Crítica,Falha de comunicação,false,60.0,Encerrado
+EVT-074,ATV-004,2026-07-20T19:41:00,2026-07-21T00:30:00,Crítica,Restrição de rede,false,64.1,Encerrado
+EVT-075,ATV-004,2026-07-21T01:14:00,2026-07-21T06:40:00,Média,Proteção acionada,false,68.2,Encerrado
+EVT-076,ATV-004,2026-07-21T08:37:00,2026-07-21T14:40:00,Alta,Falha de comunicação,false,72.3,Encerrado
+EVT-077,ATV-004,2026-07-21T16:10:00,2026-07-21T22:50:00,Alta,Proteção acionada,false,76.4,Encerrado
+EVT-078,ATV-004,2026-07-21T21:33:00,2026-07-22T04:50:00,Crítica,Falha de comunicação,false,80.6,Aberto
+EVT-079,ATV-005,2026-07-22T03:00:00,2026-07-22T03:40:00,Baixa,Manutenção planejada,true,6.4,Encerrado
+EVT-080,ATV-005,2026-07-22T08:23:00,2026-07-22T09:32:00,Baixa,Inspeção preventiva,true,9.7,Encerrado
+EVT-081,ATV-005,2026-07-22T14:46:00,2026-07-22T16:24:00,Média,Restrição de rede,false,24.9,Encerrado
+EVT-082,ATV-005,2026-07-22T21:19:00,2026-07-22T23:26:00,Alta,Manutenção planejada,true,16.1,Encerrado
+EVT-083,ATV-005,2026-07-23T05:42:00,2026-07-23T08:18:00,Baixa,Manutenção planejada,true,19.3,Encerrado
+EVT-084,ATV-005,2026-07-23T10:15:00,2026-07-23T13:20:00,Baixa,Inspeção preventiva,true,22.6,Encerrado
+EVT-085,ATV-005,2026-07-23T16:38:00,2026-07-23T20:12:00,Média,Restrição de rede,false,37.8,Encerrado
+EVT-086,ATV-005,2026-07-23T23:11:00,2026-07-24T03:14:00,Alta,Manutenção planejada,true,29.0,Encerrado
+EVT-087,ATV-005,2026-07-24T07:34:00,2026-07-24T12:06:00,Baixa,Manutenção planejada,true,32.2,Encerrado
+EVT-088,ATV-005,2026-07-24T12:07:00,2026-07-24T13:08:00,Baixa,Inspeção preventiva,true,8.8,Encerrado
+EVT-089,ATV-005,2026-07-24T18:30:00,2026-07-24T20:00:00,Média,Restrição de rede,false,24.0,Encerrado
+EVT-090,ATV-005,2026-07-25T01:03:00,2026-07-25T03:02:00,Alta,Manutenção planejada,true,15.2,Encerrado
+EVT-091,ATV-005,2026-07-25T09:26:00,2026-07-25T11:54:00,Baixa,Manutenção planejada,true,18.4,Encerrado
+EVT-092,ATV-005,2026-07-25T14:49:00,2026-07-25T17:46:00,Baixa,Inspeção preventiva,true,21.7,Encerrado
+EVT-093,ATV-005,2026-07-25T20:22:00,2026-07-25T23:48:00,Média,Restrição de rede,false,36.9,Encerrado
+EVT-094,ATV-005,2026-07-26T03:45:00,2026-07-26T07:40:00,Alta,Manutenção planejada,true,28.1,Encerrado
+EVT-095,ATV-005,2026-07-26T11:18:00,2026-07-26T15:42:00,Baixa,Manutenção planejada,true,31.3,Encerrado
+EVT-096,ATV-005,2026-07-26T16:41:00,2026-07-26T17:34:00,Baixa,Inspeção preventiva,true,7.9,Encerrado
+EVT-097,ATV-006,2026-07-26T22:00:00,2026-07-26T22:25:00,Baixa,Inspeção preventiva,true,4.8,Encerrado
+EVT-098,ATV-006,2026-07-27T03:23:00,2026-07-27T04:07:00,Média,Manutenção planejada,true,6.9,Encerrado
+EVT-099,ATV-006,2026-07-27T09:46:00,2026-07-27T10:49:00,Alta,Falha de comunicação,false,21.0,Encerrado
+EVT-100,ATV-006,2026-07-27T16:19:00,2026-07-27T17:41:00,Baixa,Inspeção preventiva,true,11.1,Encerrado
+EVT-101,ATV-006,2026-07-28T00:42:00,2026-07-28T02:23:00,Baixa,Inspeção preventiva,true,13.2,Encerrado
+EVT-102,ATV-006,2026-07-28T05:15:00,2026-07-28T07:15:00,Média,Manutenção planejada,true,15.3,Encerrado
+EVT-103,ATV-006,2026-07-28T11:38:00,2026-07-28T13:57:00,Alta,Falha de comunicação,false,29.4,Encerrado
+EVT-104,ATV-006,2026-07-28T18:11:00,2026-07-28T20:49:00,Baixa,Inspeção preventiva,true,19.6,Encerrado
+EVT-105,ATV-006,2026-07-29T02:34:00,2026-07-29T05:31:00,Baixa,Inspeção preventiva,true,21.7,Encerrado
+EVT-106,ATV-006,2026-07-29T07:07:00,2026-07-29T07:43:00,Média,Manutenção planejada,true,6.0,Encerrado
+EVT-107,ATV-006,2026-07-29T13:30:00,2026-07-29T14:25:00,Alta,Falha de comunicação,false,20.1,Encerrado
+EVT-108,ATV-006,2026-07-29T20:03:00,2026-07-29T21:17:00,Baixa,Inspeção preventiva,true,10.2,Encerrado
+EVT-109,ATV-007,2026-07-30T04:00:00,2026-07-30T04:40:00,Baixa,Manutenção planejada,true,6.4,Encerrado
+EVT-110,ATV-007,2026-07-30T09:23:00,2026-07-30T10:32:00,Baixa,Inspeção preventiva,true,9.7,Encerrado
+EVT-111,ATV-007,2026-07-30T15:46:00,2026-07-30T17:24:00,Média,Restrição de rede,false,24.9,Encerrado
+EVT-112,ATV-007,2026-07-30T22:19:00,2026-07-31T00:26:00,Alta,Manutenção planejada,true,16.1,Encerrado
+EVT-113,ATV-007,2026-07-31T06:42:00,2026-07-31T09:18:00,Baixa,Manutenção planejada,true,19.3,Encerrado
+EVT-114,ATV-007,2026-07-31T11:15:00,2026-07-31T14:20:00,Baixa,Inspeção preventiva,true,22.6,Encerrado
+EVT-115,ATV-007,2026-07-31T17:38:00,2026-07-31T21:12:00,Média,Restrição de rede,false,37.8,Encerrado
+EVT-116,ATV-007,2026-08-01T00:11:00,2026-08-01T04:14:00,Alta,Manutenção planejada,true,29.0,Encerrado
+EVT-117,ATV-008,2026-08-01T08:00:00,2026-08-01T09:20:00,Alta,Proteção acionada,false,40.9,Encerrado
+EVT-118,ATV-008,2026-08-01T13:23:00,2026-08-01T15:20:00,Crítica,Falha de comunicação,false,45.0,Encerrado
+EVT-119,ATV-008,2026-08-01T19:46:00,2026-08-01T22:20:00,Crítica,Restrição de rede,false,49.1,Encerrado
+EVT-120,ATV-008,2026-08-02T02:19:00,2026-08-02T05:30:00,Média,Proteção acionada,false,53.2,Encerrado
+EVT-121,ATV-008,2026-08-02T10:42:00,2026-08-02T14:30:00,Alta,Falha de comunicação,false,57.3,Encerrado
+EVT-122,ATV-008,2026-08-02T15:15:00,2026-08-02T19:40:00,Alta,Proteção acionada,false,61.4,Encerrado
+EVT-123,ATV-008,2026-08-02T21:38:00,2026-08-03T02:40:00,Crítica,Falha de comunicação,false,65.6,Encerrado
+EVT-124,ATV-008,2026-08-03T04:11:00,2026-08-03T09:50:00,Crítica,Restrição de rede,false,69.7,Encerrado
+EVT-125,ATV-008,2026-08-03T12:34:00,2026-08-03T18:50:00,Média,Proteção acionada,false,73.8,Encerrado
+EVT-126,ATV-008,2026-08-03T17:07:00,2026-08-04T00:00:00,Alta,Falha de comunicação,false,77.9,Encerrado
+EVT-127,ATV-008,2026-08-03T23:30:00,2026-08-04T07:00:00,Alta,Proteção acionada,false,82.0,Encerrado
+EVT-128,ATV-008,2026-08-04T06:03:00,2026-08-04T14:10:00,Crítica,Falha de comunicação,false,86.1,Encerrado
+EVT-129,ATV-008,2026-08-04T14:26:00,2026-08-04T16:10:00,Crítica,Restrição de rede,false,43.6,Encerrado
+EVT-130,ATV-008,2026-08-04T19:49:00,2026-08-04T22:10:00,Média,Proteção acionada,false,47.7,Encerrado
+EVT-131,ATV-008,2026-08-05T01:22:00,2026-08-05T04:20:00,Alta,Falha de comunicação,false,51.8,Encerrado
+EVT-132,ATV-008,2026-08-05T08:45:00,2026-08-05T12:20:00,Alta,Proteção acionada,false,55.9,Encerrado
+EVT-133,ATV-008,2026-08-05T16:18:00,2026-08-05T20:30:00,Crítica,Falha de comunicação,false,60.0,Encerrado
+EVT-134,ATV-008,2026-08-05T21:41:00,2026-08-06T02:30:00,Crítica,Restrição de rede,false,64.1,Encerrado
+EVT-135,ATV-008,2026-08-06T03:14:00,2026-08-06T08:40:00,Média,Proteção acionada,false,68.2,Encerrado
+EVT-136,ATV-008,2026-08-06T10:37:00,2026-08-06T16:40:00,Alta,Falha de comunicação,false,72.3,Encerrado
+EVT-137,ATV-008,2026-08-06T18:10:00,2026-08-07T00:50:00,Alta,Proteção acionada,false,76.4,Encerrado
+EVT-138,ATV-008,2026-08-06T23:33:00,2026-08-07T06:50:00,Crítica,Falha de comunicação,false,80.6,Encerrado
+EVT-139,ATV-008,2026-08-07T05:06:00,2026-08-07T13:00:00,Crítica,Restrição de rede,false,84.7,Encerrado
+EVT-140,ATV-008,2026-08-07T12:29:00,2026-08-07T14:00:00,Média,Proteção acionada,false,42.1,Encerrado
+EVT-141,ATV-008,2026-08-07T20:02:00,2026-08-07T22:10:00,Alta,Falha de comunicação,false,46.2,Encerrado
+EVT-142,ATV-008,2026-08-08T01:25:00,2026-08-08T04:10:00,Alta,Proteção acionada,false,50.3,Encerrado
+EVT-143,ATV-008,2026-08-08T07:48:00,2026-08-08T11:10:00,Crítica,Falha de comunicação,false,54.4,Encerrado
+EVT-144,ATV-008,2026-08-08T14:21:00,2026-08-08T18:20:00,Crítica,Restrição de rede,false,58.6,Aberto

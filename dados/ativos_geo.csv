@@ -1,0 +1,9 @@
+ativo_id,ativo_nome,tipo_geracao,regiao,estado_nome,estado_sigla,pais,latitude,longitude,capacidade_mw,data_comissionamento
+ATV-001,Parque Aurora,Solar,Sudeste,São Paulo,SP,Brazil,-23.5505,-46.6333,180.0,2021-03-15
+ATV-002,Parque Horizonte,Eólica,Nordeste,Bahia,BA,Brazil,-12.9714,-38.5014,240.0,2020-08-10
+ATV-003,Usina Vale Claro,Hídrica,Sudeste,Minas Gerais,MG,Brazil,-19.9167,-43.9345,320.0,2017-05-22
+ATV-004,Parque Ventos Sul,Eólica,Sul,Rio Grande do Sul,RS,Brazil,-30.0346,-51.2177,210.0,2022-01-18
+ATV-005,Usina Rio Sereno,Hídrica,Sul,Paraná,PR,Brazil,-25.4284,-49.2733,350.0,2015-11-04
+ATV-006,Parque Sol Nascente,Solar,Centro-Oeste,Goiás,GO,Brazil,-16.6869,-49.2648,160.0,2023-06-09
+ATV-007,Usina Águas Altas,Hídrica,Norte,Pará,PA,Brazil,-1.4558,-48.4902,400.0,2014-09-30
+ATV-008,Parque Brisa Azul,Eólica,Nordeste,Ceará,CE,Brazil,-3.7319,-38.5267,230.0,2021-12-02
