@@ -1,0 +1,1855 @@
+{
+  "datasets": [
+    {
+      "name": "ds_medicoes_ativos",
+      "displayName": "Medições com Ativos",
+      "queryLines": [
+        "SELECT\n",
+        "  m.medicao_id,\n",
+        "  m.ativo_id,\n",
+        "  m.medicao_ts,\n",
+        "  m.geracao_mwh,\n",
+        "  m.carga_mw,\n",
+        "  m.disponibilidade_pct,\n",
+        "  m.temperatura_c,\n",
+        "  m.qualidade_dado,\n",
+        "  a.ativo_nome,\n",
+        "  a.tipo_geracao,\n",
+        "  a.regiao,\n",
+        "  a.estado_nome,\n",
+        "  a.estado_sigla,\n",
+        "  a.latitude,\n",
+        "  a.longitude,\n",
+        "  a.capacidade_mw,\n",
+        "  CONCAT('BR-', a.estado_sigla) AS estado_iso\n",
+        "FROM\n",
+        "  caroljf_medicoes_horarias m\n",
+        "    JOIN caroljf_ativos_geo a\n",
+        "      ON m.ativo_id = a.ativo_id"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_perfil_horario",
+      "displayName": "Perfil Horário",
+      "queryLines": [
+        "SELECT\n",
+        "  HOUR(m.medicao_ts) AS hora_dia,\n",
+        "  a.tipo_geracao,\n",
+        "  AVG(m.geracao_mwh) AS geracao_media_mwh\n",
+        "FROM\n",
+        "  caroljf_medicoes_horarias m\n",
+        "    JOIN caroljf_ativos_geo a\n",
+        "      ON m.ativo_id = a.ativo_id\n",
+        "GROUP BY\n",
+        "  HOUR(m.medicao_ts),\n",
+        "  a.tipo_geracao\n",
+        "ORDER BY\n",
+        "  hora_dia"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_eventos_ativos",
+      "displayName": "Eventos Operacionais com Ativos",
+      "queryLines": [
+        "SELECT\n",
+        "  e.evento_id,\n",
+        "  e.ativo_id,\n",
+        "  e.inicio_ts,\n",
+        "  e.fim_ts,\n",
+        "  e.severidade,\n",
+        "  e.categoria_evento,\n",
+        "  e.planejado,\n",
+        "  e.energia_nao_suprida_mwh,\n",
+        "  e.status_evento,\n",
+        "  a.ativo_nome,\n",
+        "  a.tipo_geracao,\n",
+        "  a.estado_nome,\n",
+        "  a.estado_sigla,\n",
+        "  ROUND(TIMESTAMPDIFF(HOUR, e.inicio_ts, e.fim_ts), 1) AS duracao_horas\n",
+        "FROM\n",
+        "  caroljf_eventos_operacionais e\n",
+        "    JOIN caroljf_ativos_geo a\n",
+        "      ON e.ativo_id = a.ativo_id"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_ativos_ranking",
+      "displayName": "Ativos com Métricas Consolidadas",
+      "queryLines": [
+        "SELECT\n",
+        "  a.ativo_id,\n",
+        "  a.ativo_nome,\n",
+        "  a.tipo_geracao,\n",
+        "  a.estado_nome,\n",
+        "  a.estado_sigla,\n",
+        "  a.latitude,\n",
+        "  a.longitude,\n",
+        "  a.capacidade_mw,\n",
+        "  COALESCE(mg.geracao_total_mwh, 0) AS geracao_total_mwh,\n",
+        "  COALESCE(mg.disponibilidade_media_pct, 0) AS disponibilidade_media_pct,\n",
+        "  COALESCE(ev.ens_total_mwh, 0) AS ens_total_mwh\n",
+        "FROM\n",
+        "  caroljf_ativos_geo a\n",
+        "    LEFT JOIN (\n",
+        "      SELECT\n",
+        "        ativo_id,\n",
+        "        SUM(geracao_mwh) AS geracao_total_mwh,\n",
+        "        AVG(disponibilidade_pct) AS disponibilidade_media_pct\n",
+        "      FROM\n",
+        "        caroljf_medicoes_horarias\n",
+        "      GROUP BY\n",
+        "        ativo_id\n",
+        "    ) mg\n",
+        "      ON a.ativo_id = mg.ativo_id\n",
+        "    LEFT JOIN (\n",
+        "      SELECT\n",
+        "        ativo_id,\n",
+        "        SUM(energia_nao_suprida_mwh) AS ens_total_mwh\n",
+        "      FROM\n",
+        "        caroljf_eventos_operacionais\n",
+        "      GROUP BY\n",
+        "        ativo_id\n",
+        "    ) ev\n",
+        "      ON a.ativo_id = ev.ativo_id"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_rotas_path",
+      "displayName": "Rotas de Inspeção (Geometria)",
+      "queryLines": [
+        "SELECT\n",
+        "  rota_id,\n",
+        "  equipe,\n",
+        "  MAX(ativo_nome) AS ativo_nome,\n",
+        "  MAX(estado_nome) AS estado_nome,\n",
+        "  MIN(ponto_ts) AS horario_inicio,\n",
+        "  MAX(distancia_acumulada_km) AS distancia_km,\n",
+        "  MAX(status_rota) AS status_rota,\n",
+        "  ST_MAKELINE(\n",
+        "    transform(\n",
+        "      sort_array(\n",
+        "        collect_list(named_struct('ordem', ordem_ponto, 'lat', latitude, 'lng', longitude))\n",
+        "      ),\n",
+        "      x -> ST_POINT(x.lng, x.lat)\n",
+        "    )\n",
+        "  ) AS rota_geom\n",
+        "FROM\n",
+        "  (\n",
+        "    SELECT\n",
+        "      r.rota_id,\n",
+        "      r.equipe,\n",
+        "      r.ordem_ponto,\n",
+        "      r.ponto_ts,\n",
+        "      r.longitude,\n",
+        "      r.latitude,\n",
+        "      r.distancia_acumulada_km,\n",
+        "      r.status_rota,\n",
+        "      a.ativo_nome,\n",
+        "      a.estado_nome\n",
+        "    FROM\n",
+        "      caroljf_rotas_inspecao r\n",
+        "        LEFT JOIN caroljf_ativos_geo a\n",
+        "          ON r.ativo_id = a.ativo_id\n",
+        "  ) t\n",
+        "GROUP BY\n",
+        "  rota_id,\n",
+        "  equipe"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_rotas_raw",
+      "displayName": "Rotas de Inspeção (Pontos)",
+      "queryLines": [
+        "SELECT\n",
+        "  r.ponto_id,\n",
+        "  r.rota_id,\n",
+        "  r.ordem_ponto,\n",
+        "  r.ponto_ts,\n",
+        "  r.ativo_id,\n",
+        "  r.equipe,\n",
+        "  r.latitude,\n",
+        "  r.longitude,\n",
+        "  r.distancia_acumulada_km,\n",
+        "  r.status_rota,\n",
+        "  a.ativo_nome,\n",
+        "  a.estado_nome\n",
+        "FROM\n",
+        "  caroljf_rotas_inspecao r\n",
+        "    LEFT JOIN caroljf_ativos_geo a\n",
+        "      ON r.ativo_id = a.ativo_id\n",
+        "ORDER BY\n",
+        "  r.equipe,\n",
+        "  r.rota_id,\n",
+        "  r.ordem_ponto"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_rotas_dist",
+      "displayName": "Distância Final por Rota",
+      "queryLines": [
+        "SELECT\n",
+        "  rota_id,\n",
+        "  equipe,\n",
+        "  MAX(distancia_acumulada_km) AS distancia_final_km\n",
+        "FROM\n",
+        "  caroljf_rotas_inspecao\n",
+        "GROUP BY\n",
+        "  rota_id,\n",
+        "  equipe"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    },
+    {
+      "name": "ds_disp_meta",
+      "displayName": "Disponibilidade por Estado com Meta",
+      "queryLines": [
+        "SELECT\n",
+        "  a.estado_nome,\n",
+        "  AVG(m.disponibilidade_pct) AS disponibilidade_media_pct,\n",
+        "  95.0 AS meta_pct\n",
+        "FROM\n",
+        "  caroljf_medicoes_horarias m\n",
+        "    JOIN caroljf_ativos_geo a\n",
+        "      ON m.ativo_id = a.ativo_id\n",
+        "GROUP BY\n",
+        "  a.estado_nome\n",
+        "ORDER BY\n",
+        "  a.estado_nome"
+      ],
+      "catalog": "workspace_carolina_ferreira_catalog",
+      "schema": "workshop_agosto"
+    }
+  ],
+  "pages": [
+    {
+      "name": "68de749d",
+      "displayName": "Visão Executiva",
+      "layout": [
+        {
+          "widget": {
+            "name": "kpi_geracao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração Total (MWh)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(geracao_mwh)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_disp",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "avg(disponibilidade_pct)",
+                      "expression": "AVG(`disponibilidade_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Disponibilidade Média (%)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(disponibilidade_pct)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_ens",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_eventos_ativos",
+                  "fields": [
+                    {
+                      "name": "sum(energia_nao_suprida_mwh)",
+                      "expression": "SUM(`energia_nao_suprida_mwh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Energia Não Suprida (MWh)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(energia_nao_suprida_mwh)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_eventos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_eventos_ativos",
+                  "fields": [
+                    {
+                      "name": "count(evento_id)",
+                      "expression": "COUNT(`evento_id`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`severidade` IN ('Crítica')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Eventos Críticos"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(evento_id)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "line_geracao_dia",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "daily(medicao_ts)",
+                      "expression": "DATE_TRUNC(\"DAY\", `medicao_ts`)"
+                    },
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração total por dia (MWh)"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(medicao_ts)",
+                  "displayName": "Day",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(geracao_mwh)",
+                  "displayName": "Geração (MWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "area_geracao_carga",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "daily(medicao_ts)",
+                      "expression": "DATE_TRUNC(\"DAY\", `medicao_ts`)"
+                    },
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    },
+                    {
+                      "name": "avg(carga_mw)",
+                      "expression": "AVG(`carga_mw`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração diária vs Carga média"
+              },
+              "version": 3,
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(medicao_ts)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "sum(geracao_mwh)",
+                      "displayName": "Geração (MWh)"
+                    },
+                    {
+                      "fieldName": "avg(carga_mw)",
+                      "displayName": "Carga média (MW)"
+                    }
+                  ],
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 2,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "line_perfil_hora",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_perfil_horario",
+                  "fields": [
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "hora_dia",
+                      "expression": "`hora_dia`"
+                    },
+                    {
+                      "name": "sum(geracao_media_mwh)",
+                      "expression": "SUM(`geracao_media_mwh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Perfil médio de geração por hora do dia"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "hora_dia",
+                  "displayName": "hora_dia",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(geracao_media_mwh)",
+                  "displayName": "Geração média (MWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "tipo_geracao",
+                  "displayName": "tipo_geracao",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_disp_tipo",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "avg(disponibilidade_pct)",
+                      "expression": "AVG(`disponibilidade_pct`)"
+                    },
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Disponibilidade média por tipo de geração (%)"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg(disponibilidade_pct)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "displayName": "Disponibilidade (%)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "type": "custom",
+                      "min": 70
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "tipo_geracao",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_geracao_tipo",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração total por tipo de geração"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "tipo_geracao",
+                  "displayName": "tipo_geracao",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(geracao_mwh)",
+                  "displayName": "Geração (MWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "tipo_geracao",
+                  "displayName": "tipo_geracao",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "combo_estado",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "estado_sigla",
+                      "expression": "`estado_sigla`"
+                    },
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    },
+                    {
+                      "name": "avg(disponibilidade_pct)",
+                      "expression": "AVG(`disponibilidade_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração e disponibilidade por estado"
+              },
+              "version": 1,
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "estado_sigla",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "sum(geracao_mwh)",
+                        "displayName": "Geração (MWh)"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "avg(disponibilidade_pct)",
+                        "displayName": "Disponibilidade (%)"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    },
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "formatTemplate": "{{ @formatted }}%"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 7,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "table_eventos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_eventos_ativos",
+                  "fields": [
+                    {
+                      "name": "ativo_nome",
+                      "expression": "`ativo_nome`"
+                    },
+                    {
+                      "name": "severidade",
+                      "expression": "`severidade`"
+                    },
+                    {
+                      "name": "duracao_horas",
+                      "expression": "`duracao_horas`"
+                    },
+                    {
+                      "name": "energia_nao_suprida_mwh",
+                      "expression": "`energia_nao_suprida_mwh`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`severidade` IN ('Crítica')"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Eventos críticos"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "ativo_nome"
+                  },
+                  {
+                    "fieldName": "severidade"
+                  },
+                  {
+                    "fieldName": "duracao_horas"
+                  },
+                  {
+                    "fieldName": "energia_nao_suprida_mwh"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "geo",
+      "displayName": "Operação Geográfica",
+      "layout": [
+        {
+          "widget": {
+            "name": "choropleth",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    },
+                    {
+                      "name": "avg(disponibilidade_pct)",
+                      "expression": "AVG(`disponibilidade_pct`)"
+                    },
+                    {
+                      "name": "estado_iso",
+                      "expression": "`estado_iso`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração por estado (MWh)"
+              },
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "color": {
+                  "fieldName": "sum(geracao_mwh)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Geração (MWh)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "blues"
+                    }
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "avg(disponibilidade_pct)",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "formatTemplate": "{{ @formatted }}%",
+                    "displayName": "Disponibilidade (%)"
+                  }
+                ],
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "type": "value",
+                    "value": "Brazil",
+                    "geographicRole": "admin0-name-en"
+                  },
+                  "admin1": {
+                    "fieldName": "estado_iso",
+                    "type": "field",
+                    "geographicRole": "admin1-iso-3166-2"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "point_map",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_ativos_ranking",
+                  "fields": [
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    },
+                    {
+                      "name": "ativo_nome",
+                      "expression": "`ativo_nome`"
+                    },
+                    {
+                      "name": "estado_nome",
+                      "expression": "`estado_nome`"
+                    },
+                    {
+                      "name": "capacidade_mw",
+                      "expression": "`capacidade_mw`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Mapa de ativos"
+              },
+              "version": 2,
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "coordinateType": "longitude-latitude",
+                  "latitude": {
+                    "fieldName": "latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "longitude"
+                  }
+                },
+                "color": {
+                  "fieldName": "tipo_geracao",
+                  "displayName": "Tipo de Geração",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "size": {
+                  "fieldName": "capacidade_mw",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Capacidade (MW)"
+                },
+                "extra": [
+                  {
+                    "fieldName": "ativo_nome",
+                    "displayName": "Ativo"
+                  },
+                  {
+                    "fieldName": "estado_nome",
+                    "displayName": "Estado"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "path_map",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_rotas_path",
+                  "fields": [
+                    {
+                      "name": "equipe",
+                      "expression": "`equipe`"
+                    },
+                    {
+                      "name": "rota_id",
+                      "expression": "`rota_id`"
+                    },
+                    {
+                      "name": "ativo_nome",
+                      "expression": "`ativo_nome`"
+                    },
+                    {
+                      "name": "horario_inicio",
+                      "expression": "`horario_inicio`"
+                    },
+                    {
+                      "name": "distancia_km",
+                      "expression": "`distancia_km`"
+                    },
+                    {
+                      "name": "status_rota",
+                      "expression": "`status_rota`"
+                    },
+                    {
+                      "name": "geo(rota_geom)",
+                      "expression": "ST_ASGEOJSON(`rota_geom`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Rotas de inspeção"
+              },
+              "version": 1,
+              "widgetType": "path-map",
+              "encodings": {
+                "path": {
+                  "pathType": "geometry",
+                  "fieldName": "geo(rota_geom)"
+                },
+                "color": {
+                  "fieldName": "equipe",
+                  "displayName": "Equipe",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "rota_id",
+                    "displayName": "Rota"
+                  },
+                  {
+                    "fieldName": "ativo_nome",
+                    "displayName": "Ativo"
+                  },
+                  {
+                    "fieldName": "horario_inicio",
+                    "displayName": "Horário"
+                  },
+                  {
+                    "fieldName": "distancia_km",
+                    "displayName": "Distância (km)"
+                  },
+                  {
+                    "fieldName": "status_rota",
+                    "displayName": "Status"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 8,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_eventos_sev",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_eventos_ativos",
+                  "fields": [
+                    {
+                      "name": "severidade",
+                      "expression": "`severidade`"
+                    },
+                    {
+                      "name": "estado_sigla",
+                      "expression": "`estado_sigla`"
+                    },
+                    {
+                      "name": "count(evento_id)",
+                      "expression": "COUNT(`evento_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Eventos por severidade e estado"
+              },
+              "version": 3,
+              "mark": {
+                "layout": "group"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "estado_sigla",
+                  "displayName": "Estado",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "count(evento_id)",
+                  "displayName": "Qtd Eventos",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "severidade",
+                  "displayName": "Severidade",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "scatter_cap",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_ativos_ranking",
+                  "fields": [
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "capacidade_mw",
+                      "expression": "`capacidade_mw`"
+                    },
+                    {
+                      "name": "geracao_total_mwh",
+                      "expression": "`geracao_total_mwh`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Capacidade vs Geração por ativo"
+              },
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "capacidade_mw",
+                  "displayName": "Capacidade (MW)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "geracao_total_mwh",
+                  "displayName": "Geração Total (MWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "tipo_geracao",
+                  "displayName": "Tipo de Geração",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_geracao_estado",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "estado_sigla",
+                      "expression": "`estado_sigla`"
+                    },
+                    {
+                      "name": "sum(geracao_mwh)",
+                      "expression": "SUM(`geracao_mwh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração total por estado (MWh)"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "estado_sigla",
+                  "displayName": "estado_sigla",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(geracao_mwh)",
+                  "displayName": "Geração (MWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "estado_sigla",
+                  "displayName": "estado_sigla",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "heatmap_disp",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "avg(disponibilidade_pct)",
+                      "expression": "AVG(`disponibilidade_pct`)"
+                    },
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "estado_nome",
+                      "expression": "`estado_nome`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Disponibilidade por estado e tipo (%)"
+              },
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "tipo_geracao",
+                  "displayName": "Tipo de Geração",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "estado_nome",
+                  "displayName": "Estado",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "avg(disponibilidade_pct)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "displayName": "Disponibilidade (%)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "blues"
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 16,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_dist_equipe",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_rotas_dist",
+                  "fields": [
+                    {
+                      "name": "equipe",
+                      "expression": "`equipe`"
+                    },
+                    {
+                      "name": "sum(distancia_final_km)",
+                      "expression": "SUM(`distancia_final_km`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Distância final por equipe (km)"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "equipe",
+                  "displayName": "equipe",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(distancia_final_km)",
+                  "displayName": "Distância (km)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "equipe",
+                  "displayName": "equipe",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 21,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "line_dist_acum",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_rotas_raw",
+                  "fields": [
+                    {
+                      "name": "ordem_ponto",
+                      "expression": "`ordem_ponto`"
+                    },
+                    {
+                      "name": "dist_media",
+                      "expression": "AVG(`distancia_acumulada_km`)"
+                    },
+                    {
+                      "name": "equipe",
+                      "expression": "`equipe`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Distância acumulada por equipe"
+              },
+              "jsonSpec": {
+                "type": "vega-lite",
+                "spec": "{\"data\":{\"name\":\"databricks_query\"},\"width\":\"container\",\"height\":\"container\",\"config\":{\"autosize\":{\"type\":\"fit\",\"contains\":\"padding\"},\"view\":{\"stroke\":null},\"legend\":{\"orient\":\"top\",\"titleFontSize\":12,\"labelFontSize\":11}},\"layer\":[{\"mark\":{\"type\":\"area\",\"interpolate\":\"monotone\",\"opacity\":0.08},\"encoding\":{\"x\":{\"field\":\"ordem_ponto\",\"type\":\"quantitative\",\"title\":\"Ponto da Rota\"},\"y\":{\"field\":\"dist_media\",\"type\":\"quantitative\",\"title\":\"Distância Acumulada (km)\"},\"color\":{\"field\":\"equipe\",\"type\":\"nominal\",\"title\":\"Equipe\"}}},{\"mark\":{\"type\":\"line\",\"interpolate\":\"monotone\",\"strokeWidth\":2.5},\"encoding\":{\"x\":{\"field\":\"ordem_ponto\",\"type\":\"quantitative\"},\"y\":{\"field\":\"dist_media\",\"type\":\"quantitative\"},\"color\":{\"field\":\"equipe\",\"type\":\"nominal\"},\"tooltip\":[{\"field\":\"equipe\",\"type\":\"nominal\",\"title\":\"Equipe\"},{\"field\":\"ordem_ponto\",\"type\":\"quantitative\",\"title\":\"Ponto\"},{\"field\":\"dist_media\",\"type\":\"quantitative\",\"title\":\"Dist. Média (km)\",\"format\":\".1f\"}]}},{\"mark\":{\"type\":\"circle\",\"size\":50,\"opacity\":0.7},\"encoding\":{\"x\":{\"field\":\"ordem_ponto\",\"type\":\"quantitative\"},\"y\":{\"field\":\"dist_media\",\"type\":\"quantitative\"},\"color\":{\"field\":\"equipe\",\"type\":\"nominal\"}}},{\"mark\":{\"type\":\"text\",\"align\":\"left\",\"dx\":6,\"fontSize\":11,\"fontWeight\":\"bold\"},\"transform\":[{\"window\":[{\"op\":\"rank\",\"as\":\"rank\"}],\"sort\":[{\"field\":\"ordem_ponto\",\"order\":\"descending\"}],\"groupby\":[\"equipe\"]},{\"filter\":\"datum.rank === 1\"}],\"encoding\":{\"x\":{\"field\":\"ordem_ponto\",\"type\":\"quantitative\"},\"y\":{\"field\":\"dist_media\",\"type\":\"quantitative\"},\"text\":{\"field\":\"equipe\",\"type\":\"nominal\"},\"color\":{\"field\":\"equipe\",\"type\":\"nominal\",\"legend\":null}}}]}"
+              },
+              "version": 1,
+              "widgetType": "custom-vega-viz",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "ordem_ponto"
+                  },
+                  {
+                    "fieldName": "dist_media"
+                  },
+                  {
+                    "fieldName": "equipe"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 25,
+            "width": 8,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "table_ranking",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_ativos_ranking",
+                  "fields": [
+                    {
+                      "name": "ativo_nome",
+                      "expression": "`ativo_nome`"
+                    },
+                    {
+                      "name": "estado_nome",
+                      "expression": "`estado_nome`"
+                    },
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "geracao_total_mwh",
+                      "expression": "`geracao_total_mwh`"
+                    },
+                    {
+                      "name": "disponibilidade_media_pct",
+                      "expression": "`disponibilidade_media_pct`"
+                    },
+                    {
+                      "name": "ens_total_mwh",
+                      "expression": "`ens_total_mwh`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ranking de ativos"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "ativo_nome"
+                  },
+                  {
+                    "fieldName": "estado_nome"
+                  },
+                  {
+                    "fieldName": "tipo_geracao"
+                  },
+                  {
+                    "fieldName": "geracao_total_mwh"
+                  },
+                  {
+                    "fieldName": "disponibilidade_media_pct"
+                  },
+                  {
+                    "fieldName": "ens_total_mwh"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 21,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "vega_lollipop_ativos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_ativos_ranking",
+                  "fields": [
+                    {
+                      "name": "ativo",
+                      "expression": "`ativo_nome`"
+                    },
+                    {
+                      "name": "geracao",
+                      "expression": "`geracao_total_mwh`"
+                    },
+                    {
+                      "name": "tipo",
+                      "expression": "`tipo_geracao`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Geração por ativo — Lollipop"
+              },
+              "version": 1,
+              "jsonSpec": {
+                "type": "vega-lite",
+                "spec": "{\"$schema\":\"https://vega.github.io/schema/vega-lite/v6.json\",\"data\":{\"name\":\"databricks_query\"},\"width\":\"container\",\"height\":\"container\",\"config\":{\"autosize\":{\"type\":\"fit\",\"contains\":\"padding\"},\"view\":{\"stroke\":null}},\"transform\":[{\"window\":[{\"op\":\"rank\",\"as\":\"rank\"}],\"sort\":[{\"field\":\"geracao\",\"order\":\"descending\"}]}],\"params\":[{\"name\":\"databricks_mark_selection\",\"select\":{\"type\":\"point\",\"fields\":[\"ativo\",\"tipo\"]}}],\"layer\":[{\"mark\":{\"type\":\"rule\",\"strokeWidth\":2},\"encoding\":{\"y\":{\"field\":\"ativo\",\"type\":\"nominal\",\"sort\":{\"field\":\"geracao\",\"order\":\"descending\"},\"title\":\"Ativo\"},\"x\":{\"datum\":0},\"x2\":{\"field\":\"geracao\"},\"color\":{\"field\":\"tipo\",\"type\":\"nominal\",\"title\":\"Tipo de Geração\"},\"fillOpacity\":{\"condition\":{\"param\":\"databricks_mark_selection\",\"value\":1},\"value\":0.3},\"strokeOpacity\":{\"condition\":{\"param\":\"databricks_mark_selection\",\"value\":1},\"value\":0.3}}},{\"mark\":{\"type\":\"circle\",\"size\":120,\"stroke\":null},\"encoding\":{\"y\":{\"field\":\"ativo\",\"type\":\"nominal\",\"sort\":{\"field\":\"geracao\",\"order\":\"descending\"}},\"x\":{\"field\":\"geracao\",\"type\":\"quantitative\",\"title\":\"Geração Total (MWh)\"},\"color\":{\"field\":\"tipo\",\"type\":\"nominal\"},\"fillOpacity\":{\"condition\":{\"param\":\"databricks_mark_selection\",\"value\":1},\"value\":0.3},\"stroke\":{\"condition\":{\"param\":\"databricks_mark_selection\",\"empty\":false,\"value\":{\"expr\":\"colors.markHighlightColor\"}},\"value\":null},\"strokeWidth\":{\"condition\":{\"param\":\"databricks_mark_selection\",\"empty\":false,\"value\":2},\"value\":0},\"tooltip\":[{\"field\":\"ativo\",\"type\":\"nominal\",\"title\":\"Ativo\"},{\"field\":\"tipo\",\"type\":\"nominal\",\"title\":\"Tipo\"},{\"field\":\"geracao\",\"type\":\"quantitative\",\"title\":\"Geração (MWh)\",\"format\":\",.0f\"}]}}]}"
+              },
+              "widgetType": "custom-vega-viz",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "ativo"
+                  },
+                  {
+                    "fieldName": "geracao"
+                  },
+                  {
+                    "fieldName": "tipo"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 31,
+            "width": 8,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "global_filters",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "filtro_estado",
+            "queries": [
+              {
+                "name": "dashboards/01f1b8bdbdad1137a97ca1572232d547/datasets/01f1b8be3f1417a99aafb469edd4a5b4_estado_nome",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "estado_nome",
+                      "expression": "`estado_nome`"
+                    },
+                    {
+                      "name": "estado_nome_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Estado"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "estado_nome",
+                    "queryName": "dashboards/01f1b8bdbdad1137a97ca1572232d547/datasets/01f1b8be3f1417a99aafb469edd4a5b4_estado_nome"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_tipo",
+            "queries": [
+              {
+                "name": "dashboards/01f1b8bdbdad1137a97ca1572232d547/datasets/01f1b8be3f1417a99aafb469edd4a5b4_tipo_geracao",
+                "query": {
+                  "datasetName": "ds_medicoes_ativos",
+                  "fields": [
+                    {
+                      "name": "tipo_geracao",
+                      "expression": "`tipo_geracao`"
+                    },
+                    {
+                      "name": "tipo_geracao_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Tipo de Geração"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "tipo_geracao",
+                    "queryName": "dashboards/01f1b8bdbdad1137a97ca1572232d547/datasets/01f1b8be3f1417a99aafb469edd4a5b4_tipo_geracao"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
